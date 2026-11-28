@@ -1,0 +1,21 @@
+name: Replace release file
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        required: true
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dist
+      - run: sha256sum -c SHA256SUMS
+      - run: |
+          gh release upload "v${{ inputs.version }}" $(awk '{print $2}' SHA256SUMS) --clobber
+          gh release edit "v${{ inputs.version }}" --notes-file NOTES.md
+        env:
+          GH_TOKEN: ${{ github.token }}
